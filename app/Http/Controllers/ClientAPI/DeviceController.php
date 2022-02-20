@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\Device;
 use App\Models\DeviceApp;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
 use Webpatser\Uuid\Uuid;
@@ -92,8 +93,11 @@ class DeviceController extends Controller
             return response()->json(['result' => false, 'message' => 'client_token does not match'], 200);
         }
         $device_app->subscription = 1;
-        //$device_app->expire_date = ;
-        return response()->json(['result' => true, 'subscription' => $device_app->subscription], 200);
+        $date = Carbon::now()->addMonth();
+        $device_app->expire_date = $date;
+        $expire_date = Carbon::createFromFormat('Y-m-d H:i:s', $date, 'UTC -6');
+
+        return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
     }
 
     public function checkSubscription(Request $request)
