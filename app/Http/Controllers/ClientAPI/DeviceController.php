@@ -93,9 +93,9 @@ class DeviceController extends Controller
             return response()->json(['result' => false, 'message' => 'client_token does not match'], 200);
         }
         $device_app->subscription = 1;
-        $date = Carbon::now()->addMonth();
+        $date = Carbon::now();
         $device_app->expire_date = $date;
-        $expire_date = Carbon::createFromFormat('Y-m-d H:i:s', $date, 'UTC -6');
+        $expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
 
         return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
     }
