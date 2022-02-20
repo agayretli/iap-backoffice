@@ -19,6 +19,7 @@ class DeviceApp extends Model
     protected $keyType = 'string';
 
     protected $dates = [
+        'expire_date',
         'created_at',
         'updated_at',
     ];
