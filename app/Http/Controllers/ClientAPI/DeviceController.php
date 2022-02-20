@@ -95,6 +95,10 @@ class DeviceController extends Controller
         $device_app->subscription = 1;
         $date = Carbon::now();
         $device_app->expire_date = $date;
+        if ($device_app->save()) {
+        } else {
+            return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
+        }
         $expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
 
         return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
