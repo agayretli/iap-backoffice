@@ -23,7 +23,7 @@ class SubscriptionRenewed
     public function handle(Renewed $event)
     {
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('POST', 'https://localhost:8080/api/subscription/renewed',
+        $response = $client->request('POST', 'http://localhost:8080/api/subscription/renewed',
             [
                 'headers' => [
                     'Content-Type' => 'application/json',

@@ -23,7 +23,7 @@ class SubscriptionCanceled
     public function handle(Canceled $event)
     {
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('POST', 'https://localhost:8080/api/subscription/canceled',
+        $response = $client->request('POST', 'http://localhost:8080/api/subscription/canceled',
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
