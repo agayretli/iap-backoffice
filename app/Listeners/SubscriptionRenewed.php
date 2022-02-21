@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\Renewed;
-use App\Models\Report;
 
 class SubscriptionRenewed
 {
@@ -24,12 +23,7 @@ class SubscriptionRenewed
     public function handle(Renewed $event)
     {
         //Reporting
-        $report = new Report();
-        $report->device_id = $event->device_app->device_id;
-        $report->app_id = $event->device_app->app_id;
-        $report->subscription_status = 'renewed';
-        $report->operating_system = $event->device_app->operating_system;
-        $report->save();
+        app('App\Http\Controllers\Report\ReportController')->addRecords($event->device_app, 'renewed');
 
         $client = new \GuzzleHttp\Client();
         $response = $client->request('POST', env('ENDPOINT_URL', 'http://localhost:8080').'/api/subscription/renewed',

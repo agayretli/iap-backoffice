@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\Started;
-use App\Models\Report;
 
 class SubscriptionStarted
 {
@@ -24,12 +23,7 @@ class SubscriptionStarted
     public function handle(Started $event)
     {
         //Reporting
-        $report = new Report();
-        $report->device_id = $event->device_app->device_id;
-        $report->app_id = $event->device_app->app_id;
-        $report->subscription_status = 'started';
-        $report->operating_system = $event->device_app->operating_system;
-        $report->save();
+        app('App\Http\Controllers\Report\ReportController')->addRecords($event->device_app, 'started');
 
         $client = new \GuzzleHttp\Client();
         $response = $client->request('POST', env('ENDPOINT_URL', 'http://localhost:8080').'/api/subscription/started',
