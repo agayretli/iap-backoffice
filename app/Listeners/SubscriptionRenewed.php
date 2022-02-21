@@ -22,6 +22,9 @@ class SubscriptionRenewed
      */
     public function handle(Renewed $event)
     {
+        //Reporting
+        app('App\Http\Controllers\Report\ReportController')->addRecords($event->device_app, 'renewed');
+
         $client = new \GuzzleHttp\Client();
         $response = $client->request('POST', env('ENDPOINT_URL', 'http://localhost:8080').'/api/subscription/renewed',
             [

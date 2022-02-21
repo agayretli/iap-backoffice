@@ -22,6 +22,9 @@ class SubscriptionStarted
      */
     public function handle(Started $event)
     {
+        //Reporting
+        app('App\Http\Controllers\Report\ReportController')->addRecords($event->device_app, 'started');
+
         $client = new \GuzzleHttp\Client();
         $response = $client->request('POST', env('ENDPOINT_URL', 'http://localhost:8080').'/api/subscription/started',
             [
