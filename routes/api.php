@@ -21,3 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/device/register', 'ClientAPI\DeviceController@register');
 Route::post('/device/purchase', 'ClientAPI\DeviceController@purchase');
 Route::post('/device/checksubscription', 'ClientAPI\DeviceController@checkSubscription');
+
+Route::post('/report/records', 'Report\ReportController@records');

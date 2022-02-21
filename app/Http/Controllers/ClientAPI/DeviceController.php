@@ -109,8 +109,9 @@ class DeviceController extends Controller
         $expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
         if ($is_updated) {
             event(new Renewed($device_app));
+        } else {
+            event(new Started($device_app));
         }
-        event(new Started($device_app));
 
         return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
     }
