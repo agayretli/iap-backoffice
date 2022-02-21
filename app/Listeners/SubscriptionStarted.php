@@ -23,7 +23,7 @@ class SubscriptionStarted
     public function handle(Started $event)
     {
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('POST', 'http://localhost:8080/api/subscription/started',
+        $response = $client->request('POST', env('ENDPOINT_URL', 'http://localhost:8080').'/api/subscription/started',
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
