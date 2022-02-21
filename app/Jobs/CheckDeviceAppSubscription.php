@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\Canceled;
 use App\Models\DeviceApp;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -46,6 +47,7 @@ class CheckDeviceAppSubscription implements ShouldQueue
             //todo mocking
             $this->device_app->expire_date = null;
             $this->device_app->subscription = 0;
+            event(new Canceled($device_app));
         }
         $this->device_app->save();
     }
