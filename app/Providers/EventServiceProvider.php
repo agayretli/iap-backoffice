@@ -18,6 +18,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        'App\Events\Started' => ['App\Listeners\SubscriptionStarted'],
+        'App\Events\Renewed' => ['App\Listeners\SubscriptionRenewed'],
+        'App\Events\Canceled' => ['App\Listeners\SubscriptionCanceled'],
     ];
 
     /**
@@ -27,7 +30,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
     }
 
     /**

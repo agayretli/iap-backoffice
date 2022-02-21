@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ClientAPI;
 
+use App\Events\Started;
 use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\Device;
@@ -100,6 +101,7 @@ class DeviceController extends Controller
             return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
         }
         $expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
+        event(new Started($device_app));
 
         return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
     }
