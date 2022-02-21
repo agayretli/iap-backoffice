@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\ClientAPI;
 
+use App\Events\Renewed;
+use App\Events\Started;
 use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\Device;
@@ -94,12 +96,21 @@ class DeviceController extends Controller
         }
         $device_app->subscription = 1;
         $date = Carbon::now()->addMonth();
+        $is_updated = false;
+        if ($device_app->expire_date != null) {
+            $is_updated = true;
+            $date = $device_app->expire_date->addMonth();
+        }
         $device_app->expire_date = $date;
         if ($device_app->save()) {
         } else {
             return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
         }
         $expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
+        if ($is_updated) {
+            event(new Renewed($device_app));
+        }
+        event(new Started($device_app));
 
         return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
     }
