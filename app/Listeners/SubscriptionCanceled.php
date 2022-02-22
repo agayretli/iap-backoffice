@@ -23,7 +23,7 @@ class SubscriptionCanceled
     public function handle(Canceled $event)
     {
         //Reporting
-        app('App\Http\Controllers\Report\ReportController')->addRecords($event->device_app, 'canceled');
+        app('App\Http\Controllers\Report\ReportController')->addRecord($event->device_app, 'canceled');
 
         $client = new \GuzzleHttp\Client();
         $response = $client->request('POST', env('ENDPOINT_URL', 'http://localhost:8080').'/api/subscription/canceled',
