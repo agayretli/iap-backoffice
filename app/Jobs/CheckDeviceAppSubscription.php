@@ -52,7 +52,7 @@ class CheckDeviceAppSubscription implements ShouldQueue
                 $response = app('App\Http\Controllers\Validation\ValidateController')->iosVerify($this->device_app->receipt);
             }
             if ($response['status']) {
-                $this->device_app->expire_date = $response['expire-date'];
+                $this->device_app->expire_date = $response['expire_date'];
                 event(new Renewed($this->device_app));
             } else {
                 $this->device_app->expire_date = null;
