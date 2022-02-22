@@ -18,7 +18,7 @@ class ValidateController extends Controller
 
     public function iosVerify($receipt)
     {
-        return mock($receipt);
+        return $this->mock($receipt);
     }
 
     public function mock($receipt)
