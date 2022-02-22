@@ -120,7 +120,7 @@ class DeviceController extends Controller
         if ($device_app->expire_date != null) {
             $is_updated = true;
         }
-        $device_app->expire_date = $response['expire-date'];
+        $device_app->expire_date = $response['expire_date'];
         if ($device_app->save()) {
         } else {
             return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
@@ -133,7 +133,7 @@ class DeviceController extends Controller
             event(new Started($device_app));
         }
 
-        return response()->json(['result' => true, 'message' => $response['message'], 'status' => $response['status'], 'expire-date' => $response['expire-date']], 200);
+        return response()->json(['result' => true, 'message' => $response['message'], 'status' => $response['status'], 'expire-date' => $response['expire_date']], 200);
     }
 
     public function checkSubscription(Request $request)
