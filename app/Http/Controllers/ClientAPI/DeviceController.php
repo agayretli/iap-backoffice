@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\Device;
 use App\Models\DeviceApp;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
 use Webpatser\Uuid\Uuid;
@@ -31,6 +30,11 @@ class DeviceController extends Controller
         if ($validator->fails()) {
             return response()->json(['result' => false, 'message' => 'Validator failed.'], 200);
         }
+
+        if ($request->operating_system != 'android' && $request->operating_system != 'ios') {
+            return response()->json(['result' => false, 'message' => 'Unexpected os.'], 200);
+        }
+
         $device = Device::find($request->uid);
 
         if ($device == null) {
@@ -81,39 +85,48 @@ class DeviceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'client_token' => 'required',
-            'receipt' => 'required',
+            'receipt' => 'required|integer',
         ]);
         if ($validator->fails()) {
             return response()->json(['result' => false, 'message' => 'required parameters.'], 200);
         }
 
-        //todo mocking
-        //parse receipt
-
         $device_app = DeviceApp::where('client_token', $request->client_token)->first();
         if ($device_app == null) {
             return response()->json(['result' => false, 'message' => 'client_token does not match'], 200);
         }
-        $device_app->subscription = 1;
-        $date = Carbon::now()->addMonth();
+
+        if ($device_app->receipt == $request->receipt) {
+            return response()->json(['result' => false, 'message' => 'Duplicate request.'], 200);
+        }
+
+        //Validate Receipt
+        if ($device_app->operating_system == 'android') {
+            $response = app('App\Http\Controllers\Validation\ValidateController')->googleVerify($request->receipt);
+        } else {
+            $response = app('App\Http\Controllers\Validation\ValidateController')->iosVerify($request->receipt);
+        }
+        if (!$response['status']) {
+            return response()->json(['result' => false, 'message' => 'Purchase not validated.'], 200);
+        }
+        $device_app->subscription = $response['status'];
+        $device_app->receipt = $request->receipt;
         $is_updated = false;
         if ($device_app->expire_date != null) {
             $is_updated = true;
-            $date = $device_app->expire_date->addMonth();
         }
-        $device_app->expire_date = $date;
+        $device_app->expire_date = $response['expire-date'];
         if ($device_app->save()) {
         } else {
             return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
         }
-        $expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
         if ($is_updated) {
             event(new Renewed($device_app));
         } else {
             event(new Started($device_app));
         }
 
-        return response()->json(['result' => true, 'message' => 'OK', 'status' => ($device_app->subscription) ? true : false, 'expire-date' => $expire_date], 200);
+        return response()->json(['result' => true, 'message' => $response['message'], 'status' => $response['status'], 'expire-date' => $response['expire-date']], 200);
     }
 
     public function checkSubscription(Request $request)

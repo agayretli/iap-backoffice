@@ -19,7 +19,8 @@ class CreateDeviceAppTable extends Migration
             $table->uuid('device_id');
             $table->uuid('app_id');
             $table->string('client_token')->nullable();
-            $table->tinyInteger('subscription')->default(0);
+            $table->boolean('subscription')->default(false);
+            $table->bigInteger('receipt')->nullable();
             $table->datetime('expire_date')->nullable();
             $table->string('operating_system')->nullable();
             $table->string('language')->default('en');
