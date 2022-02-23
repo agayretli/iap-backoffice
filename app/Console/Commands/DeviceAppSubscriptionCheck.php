@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\CheckDeviceAppSubscription;
+use App\Jobs\GoogleMockReceiptVerify;
+use App\Jobs\IOSMockReceiptVerify;
 use App\Models\DeviceApp;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class DeviceAppSubscriptionCheck extends Command
@@ -41,7 +43,18 @@ class DeviceAppSubscriptionCheck extends Command
     {
         DeviceApp::whereNotNull('expire_date')->chunk(10, function ($device_apps) {
             foreach ($device_apps as $device_app) {
-                CheckDeviceAppSubscription::dispatch($device_app);
+                if ($device_app->expire_date == null) {
+                    return;
+                }
+                $expire_date = $device_app->expire_date;
+                if (Carbon::now()->gt($expire_date)) {
+                    //Validate Receipt
+                    if ($device_app->operating_system == 'android') {
+                        GoogleMockReceiptVerify::dispatch($device_app);
+                    } elseif ($device_app->operating_system == 'ios') {
+                        IOSMockReceiptVerify::dispatch($device_app);
+                    }
+                }
             }
         });
     }

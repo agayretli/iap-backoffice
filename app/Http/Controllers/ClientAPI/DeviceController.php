@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\Device;
 use App\Models\DeviceApp;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -110,30 +111,47 @@ class DeviceController extends Controller
         } else {
             $response = app('App\Http\Controllers\Validation\ValidateController')->iosVerify($request->receipt);
         }
-        if (!$response['status']) {
-            return response()->json(['result' => false, 'message' => 'Purchase not validated.'], 200);
-        }
+        if ($response->getStatusCode() == 200 || $response->getStatusCode() == 201) {
+            $response_body = $response->getBody();
+            if (!(is_null($response_body) || empty($response_body))) {
+                $body = json_decode($response_body, true);
+                if (!$body['status']) {
+                    return response()->json(['result' => false, 'message' => 'Purchase not validated.'], 200);
+                }
+                $device_app->subscription = $body['status'];
+                $device_app->receipt = $request->receipt;
+                $is_updated = false;
+                if ($device_app->expire_date != null) {
+                    $is_updated = true;
+                }
+                $device_app->expire_date = $body['expire_date'];
+                if ($device_app->save()) {
+                } else {
+                    return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
+                }
+                //Callbacks
+                if ($is_updated) {
+                    event(new Renewed($device_app));
+                } else {
+                    event(new Started($device_app));
+                }
 
-        $device_app->subscription = $response['status'];
-        $device_app->receipt = $request->receipt;
-        $is_updated = false;
-        if ($device_app->expire_date != null) {
-            $is_updated = true;
+                return response()->json(['result' => true, 'message' => $body['message'], 'status' => $body['status'], 'expire-date' => $body['expire_date']], 200);
+            }
         }
-        $device_app->expire_date = $response['expire_date'];
+        //Rate-limit error
+        //Save receipt and expire-date
+        //Will be checked on worker
+        $device_app->subscription = false;
+        $device_app->receipt = $request->receipt;
+        $date = Carbon::now();
+        $device_app->expire_date = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
         if ($device_app->save()) {
         } else {
             return response()->json(['result' => false, 'message' => 'Error on save.'], 200);
         }
 
-        //Callbacks
-        if ($is_updated) {
-            event(new Renewed($device_app));
-        } else {
-            event(new Started($device_app));
-        }
-
-        return response()->json(['result' => true, 'message' => $response['message'], 'status' => $response['status'], 'expire-date' => $response['expire_date']], 200);
+        return response()->json(['result' => false, 'message' => 'Error on request, the receipt will be checked on worker.'], 200);
     }
 
     public function checkSubscription(Request $request)
