@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Validation;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 
 class ValidateController extends Controller
 {
@@ -34,37 +33,6 @@ class ValidateController extends Controller
                 ]),
             ]
         );
-        $response_body = $response->getBody();
-        if (is_null($response_body) || empty($response_body)) {
-            return $this->localeMock($receipt);
-        }
-        $body = json_decode($response_body, true);
-
-        return $body;
-    }
-
-    public function localMock($receipt)
-    {
-        $response = [];
-        // Rate-limit error
-        /*if (!(($receipt % 100) % 6)) {
-            if (rand(0, 1)) {
-                //todo
-                $response['message'] = 'RATE-LIMIT ERROR';
-            }
-        }*/
-
-        //validate
-        if ($receipt % 2) {
-            $response['message'] = 'OK';
-            $response['status'] = true;
-            $date = Carbon::now()->addMonth();
-            $response['expire-date'] = $date->setTimezone('America/Belize')->format('Y-m-d H:i:s');
-
-            return $response;
-        }
-        $response['message'] = 'REJECT';
-        $response['status'] = false;
 
         return $response;
     }
