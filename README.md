@@ -14,7 +14,7 @@ Then, download the GitHub repo:
 git clone https://github.com/agayretli/iap-backoffice.git
 
 cd iap-backoffice
-cp example.env .env
+cp .env.example .env
 composer install
 php artisan migrate
 ```
